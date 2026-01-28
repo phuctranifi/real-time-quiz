@@ -1,0 +1,17 @@
+step 1:
+open index.html, then open user1.html and user2.html
+Step 2:
+run redis server:
+redis-server
+step 3:
+run 2 different backend instance from two different terminal:
+./gradlew bootRun --args='--server.port=8080'
+./gradlew bootRun --args='--server.port=8081'
+step 4:
+open user1.html and user2.html
+step 5:
+click connect and join on both page
+step 6:
+click correct answer or incorrect answer on both page
+step 7:
+watch the leaderboard update in real-time on both page
