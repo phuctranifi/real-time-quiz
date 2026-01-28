@@ -1,0 +1,27 @@
+{
+  "name": "quiz-platform-demo",
+  "version": "1.0.0",
+  "description": "WebSocket demo client for Quiz Platform",
+  "main": "quiz-client.js",
+  "scripts": {
+    "start": "node quiz-client.js",
+    "demo": "node quiz-client.js",
+    "demo:alice": "USER_ID=alice node quiz-client.js",
+    "demo:bob": "USER_ID=bob SERVER_URL=http://localhost:8081 node quiz-client.js",
+    "demo:charlie": "USER_ID=charlie SERVER_URL=http://localhost:8082 node quiz-client.js",
+    "demo:multi": "npm run demo:alice & npm run demo:bob & npm run demo:charlie"
+  },
+  "keywords": [
+    "websocket",
+    "stomp",
+    "quiz",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "sockjs-client": "^1.6.1",
+    "@stomp/stompjs": "^7.0.0"
+  }
+}
+

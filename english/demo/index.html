@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Platform Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .intro h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .intro p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .demo-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .card.pink {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .card.pink:hover {
+            box-shadow: 0 15px 40px rgba(240, 147, 251, 0.4);
+        }
+        
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .card p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .card a {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .card.pink a {
+            color: #f5576c;
+        }
+        
+        .card a:hover {
+            transform: scale(1.05);
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .feature h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .feature p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .status-check {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .status-check strong {
+            color: #856404;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Quiz Platform Demo</h1>
+            <p>Real-time WebSocket Quiz with Live Leaderboard</p>
+        </div>
+        
+        <div class="content">
+            <div class="intro">
+                <h2>Welcome to the Interactive Demo!</h2>
+                <p>Test the quiz platform with two different users and see real-time leaderboard updates.</p>
+            </div>
+            
+            <div class="status-check">
+                <strong>⚠️ Before you start:</strong> Make sure the Spring Boot application is running on port 8080!
+                <br>
+                Run: <code>./gradlew bootRun</code>
+            </div>
+            
+            <div class="demo-cards">
+                <div class="card">
+                    <div class="card-icon">👤</div>
+                    <h3>User 1 - Alice</h3>
+                    <p>Purple theme interface<br>Default username: alice</p>
+                    <a href="user1.html" target="_blank">Open User 1 →</a>
+                </div>
+                
+                <div class="card pink">
+                    <div class="card-icon">👤</div>
+                    <h3>User 2 - Bob</h3>
+                    <p>Pink theme interface<br>Default username: bob</p>
+                    <a href="user2.html" target="_blank">Open User 2 →</a>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>📋 How to Test</h3>
+                <ol>
+                    <li><strong>Open both user pages</strong> - Click the buttons above to open User 1 and User 2 in separate windows/tabs</li>
+                    <li><strong>Connect both users</strong> - Click "Connect & Join" on each page</li>
+                    <li><strong>Submit answers</strong> - Click the "✅ Correct Answer" or "❌ Incorrect Answer" buttons</li>
+                    <li><strong>Watch the magic!</strong> - See the leaderboard update in real-time on BOTH windows</li>
+                </ol>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Real-Time Updates</h4>
+                    <p>Instant leaderboard sync across all users</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🏆</div>
+                    <h4>Live Leaderboard</h4>
+                    <p>See rankings with medals for top 3</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h4>Statistics</h4>
+                    <p>Track score, correct, and incorrect answers</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🔌</div>
+                    <h4>WebSocket</h4>
+                    <p>STOMP over SockJS for reliable messaging</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with Spring Boot, WebSocket, Redis, and ❤️</p>
+            <p>See <a href="HTML_DEMO.md" style="color: #667eea;">HTML_DEMO.md</a> for detailed documentation</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check if server is running
+        fetch('http://localhost:8080/actuator/health')
+            .then(response => {
+                if (response.ok) {
+                    const statusCheck = document.querySelector('.status-check');
+                    statusCheck.style.background = '#d4edda';
+                    statusCheck.style.borderColor = '#28a745';
+                    statusCheck.innerHTML = '<strong>✅ Server is running!</strong> You\'re ready to test the demo.';
+                    statusCheck.querySelector('strong').style.color = '#155724';
+                }
+            })
+            .catch(error => {
+                console.log('Server not running yet');
+            });
+    </script>
+</body>
+</html>
+

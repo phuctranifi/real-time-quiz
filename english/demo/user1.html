@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Platform - User 1</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .user-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status.disconnected {
+            background: #fee;
+            color: #c33;
+        }
+        
+        .status.connected {
+            background: #efe;
+            color: #3c3;
+        }
+        
+        .status.connecting {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+        
+        .join-section {
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .answer-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .answer-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .answer-buttons button {
+            flex: 1;
+        }
+        
+        .btn-correct {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+        }
+        
+        .btn-incorrect {
+            background: linear-gradient(135deg, #d63031 0%, #e17055 100%);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .leaderboard {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .leaderboard h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .leaderboard-item.current-user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 40px;
+        }
+        
+        .medal {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2d3436;
+            color: #dfe6e9;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        
+        .log-entry.success {
+            color: #00b894;
+        }
+        
+        .log-entry.error {
+            color: #d63031;
+        }
+        
+        .log-entry.info {
+            color: #74b9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Quiz Platform</h1>
+            <div class="user-badge">User 1 (Configurable Port)</div>
+        </div>
+        
+        <div class="content">
+            <div id="status" class="status disconnected">
+                ⚫ Disconnected
+            </div>
+            
+            <div class="join-section">
+                <div class="input-group">
+                    <label for="serverPort">Server Port:</label>
+                    <input type="text" id="serverPort" placeholder="Enter server port" value="8080">
+                </div>
+
+                <div class="input-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your username" value="alice">
+                </div>
+
+                <div class="input-group">
+                    <label for="quizId">Quiz ID:</label>
+                    <input type="text" id="quizId" placeholder="Enter quiz ID" value="quiz123">
+                </div>
+
+                <button id="connectBtn" onclick="connect()">Connect & Join</button>
+                <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="label">Your Score</div>
+                    <div class="value" id="currentScore">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Correct</div>
+                    <div class="value" id="correctCount" style="color: #00b894;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Incorrect</div>
+                    <div class="value" id="incorrectCount" style="color: #d63031;">0</div>
+                </div>
+            </div>
+            
+            <div class="answer-section">
+                <h3>Submit Answer</h3>
+                <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <div style="font-size: 1.1em; font-weight: bold; color: #667eea; margin-bottom: 10px;">
+                        Current Question: <span id="currentQuestion">-</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666;">
+                        Points for correct answer: <span id="currentPoints" style="font-weight: bold; color: #00b894;">-</span>
+                    </div>
+                </div>
+                <div class="answer-buttons">
+                    <button class="btn-correct" onclick="submitAnswer(true)" id="correctBtn" disabled>
+                        ✅ Correct Answer
+                    </button>
+                    <button class="btn-incorrect" onclick="submitAnswer(false)" id="incorrectBtn" disabled>
+                        ❌ Incorrect Answer
+                    </button>
+                </div>
+            </div>
+            
+            <div class="leaderboard">
+                <h2>🏆 Leaderboard</h2>
+                <div id="leaderboardContent">
+                    <p style="text-align: center; color: #999;">Join a quiz to see the leaderboard</p>
+                </div>
+            </div>
+            
+            <div class="log" id="log">
+                <div class="log-entry info">Ready to connect...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let stompClient = null;
+        let currentUser = null;
+        let currentQuiz = null;
+        let currentQuestionNumber = null;
+        let stats = {
+            score: 0,
+            correct: 0,
+            incorrect: 0
+        };
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateStatus(status, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${status}`;
+            statusDiv.textContent = message;
+        }
+        
+        function updateStats() {
+            document.getElementById('currentScore').textContent = stats.score;
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('incorrectCount').textContent = stats.incorrect;
+        }
+        
+        function connect() {
+            const serverPort = document.getElementById('serverPort').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const quizId = document.getElementById('quizId').value.trim();
+
+            if (!serverPort || !username || !quizId) {
+                alert('Please enter server port, username, and quiz ID');
+                return;
+            }
+
+            currentUser = username;
+            currentQuiz = quizId;
+
+            updateStatus('connecting', `🟡 Connecting to port ${serverPort}...`);
+            log(`Connecting to WebSocket on port ${serverPort}...`, 'info');
+
+            const socket = new SockJS(`http://localhost:${serverPort}/ws/quiz`);
+            stompClient = StompJs.Stomp.over(socket);
+            
+            stompClient.connect({}, function(frame) {
+                updateStatus('connected', '🟢 Connected');
+                log('Connected to server!', 'success');
+                
+                // Subscribe to quiz topic (broadcast)
+                stompClient.subscribe(`/topic/quiz/${currentQuiz}`, function(message) {
+                    const data = JSON.parse(message.body);
+                    log(`Broadcast: ${data.type}`, 'info');
+
+                    if (data.type === 'LEADERBOARD_UPDATE') {
+                        updateLeaderboard(data.leaderboard);
+                        // Enable answer buttons after first leaderboard update (confirms we joined)
+                        enableAnswerButtons();
+                    }
+                });
+                
+                // Subscribe to personal messages
+                stompClient.subscribe('/user/queue/reply', function(message) {
+                    const data = JSON.parse(message.body);
+                    log(`Personal: ${data.type}`, 'info');
+                    
+                    if (data.type === 'JOIN_SUCCESS') {
+                        log(`Joined quiz: ${data.quizId}`, 'success');
+                        enableAnswerButtons();
+                    } else if (data.type === 'ANSWER_RESULT') {
+                        handleAnswerResult(data);
+                    } else if (data.type === 'ERROR') {
+                        log(`Error: ${data.error}`, 'error');
+                    }
+                });
+                
+                // Join the quiz
+                joinQuiz();
+                
+                // Update UI
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('serverPort').disabled = true;
+                document.getElementById('username').disabled = true;
+                document.getElementById('quizId').disabled = true;
+                
+            }, function(error) {
+                updateStatus('disconnected', '⚫ Connection Failed');
+                log(`Connection error: ${error}`, 'error');
+            });
+        }
+        
+        function disconnect() {
+            if (stompClient) {
+                stompClient.disconnect();
+                updateStatus('disconnected', '⚫ Disconnected');
+                log('Disconnected from server', 'info');
+                
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('serverPort').disabled = false;
+                document.getElementById('username').disabled = false;
+                document.getElementById('quizId').disabled = false;
+                disableAnswerButtons();
+            }
+        }
+        
+        function joinQuiz() {
+            log(`Joining quiz ${currentQuiz} as ${currentUser}...`, 'info');
+            stompClient.send('/app/quiz/join', {}, JSON.stringify({
+                type: 'JOIN',
+                quizId: currentQuiz,
+                userId: currentUser
+            }));
+        }
+        
+        function submitAnswer(correct) {
+            if (currentQuestionNumber === null) {
+                log('No question selected!', 'error');
+                return;
+            }
+
+            log(`Submitting ${correct ? 'correct' : 'incorrect'} answer for question ${currentQuestionNumber}...`, 'info');
+            stompClient.send('/app/quiz/submit', {}, JSON.stringify({
+                type: 'SUBMIT_ANSWER',
+                quizId: currentQuiz,
+                userId: currentUser,
+                questionNumber: currentQuestionNumber,
+                correct: correct
+            }));
+
+            // Pick a new random question after submitting
+            pickRandomQuestion();
+        }
+        
+        function handleAnswerResult(data) {
+            const wasCorrect = data.correct;
+            const pointsEarned = data.pointsEarned;
+            const newScore = data.newScore;
+            const questionNumber = data.questionNumber;
+
+            if (wasCorrect) {
+                stats.correct++;
+                log(`✅ Correct! Question ${questionNumber}: +${pointsEarned} points. New score: ${newScore}`, 'success');
+            } else {
+                stats.incorrect++;
+                log(`❌ Incorrect. Question ${questionNumber}: +0 points. Score: ${newScore}`, 'error');
+            }
+
+            stats.score = newScore;
+            updateStats();
+        }
+        
+        function updateLeaderboard(leaderboard) {
+            const content = document.getElementById('leaderboardContent');
+            content.innerHTML = '';
+            
+            if (!leaderboard || leaderboard.length === 0) {
+                content.innerHTML = '<p style="text-align: center; color: #999;">No entries yet</p>';
+                return;
+            }
+            
+            leaderboard.forEach(entry => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                
+                if (entry.userId === currentUser) {
+                    item.classList.add('current-user');
+                }
+                
+                const medal = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : '';
+                
+                item.innerHTML = `
+                    <span class="medal">${medal}</span>
+                    <span class="rank">#${entry.rank}</span>
+                    <span class="user-info">${entry.userId}${entry.userId === currentUser ? ' (You)' : ''}</span>
+                    <span class="score">${entry.score} pts</span>
+                `;
+                
+                content.appendChild(item);
+            });
+            
+            log(`Leaderboard updated (${leaderboard.length} entries)`, 'info');
+        }
+        
+        function enableAnswerButtons() {
+            // Pick a random question when enabling buttons
+            pickRandomQuestion();
+            document.getElementById('correctBtn').disabled = false;
+            document.getElementById('incorrectBtn').disabled = false;
+        }
+
+        function disableAnswerButtons() {
+            document.getElementById('correctBtn').disabled = true;
+            document.getElementById('incorrectBtn').disabled = true;
+            currentQuestionNumber = null;
+            document.getElementById('currentQuestion').textContent = '-';
+            document.getElementById('currentPoints').textContent = '-';
+        }
+
+        function pickRandomQuestion() {
+            // Pick a random question from 1 to 10
+            currentQuestionNumber = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('currentQuestion').textContent = `Question ${currentQuestionNumber}`;
+            document.getElementById('currentPoints').textContent = `${currentQuestionNumber} points`;
+            log(`New question selected: Question ${currentQuestionNumber} (${currentQuestionNumber} points)`, 'info');
+        }
+    </script>
+</body>
+</html>
+
